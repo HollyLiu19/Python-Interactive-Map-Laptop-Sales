@@ -1,0 +1,1260 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Group 2\n",
+    "## DNSC 6211 - Project 2\n",
+    "## Group Members:\n",
+    "### Haoning Liu\n",
+    "### Archit Manuja\n",
+    "### Shikui Wang\n",
+    "### Wen-Yu Wang\n",
+    "### Xincheng Zheng"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Developing the map to show where customers are coming from for particular stores"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### NOTE: To see which customers come from which store, select that particular store from the check list shown on the right corner of the map. To see various statistics regarding the stores, click on the store marker. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import pandas as pd\n",
+    "import branca\n",
+    "import matplotlib.pyplot as plt\n",
+    "import folium"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "mydata = pd.read_csv('LaptopSales.csv') #loading the data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>Date</th>\n",
+       "      <th>Configuration</th>\n",
+       "      <th>Customer Postcode</th>\n",
+       "      <th>Store Postcode</th>\n",
+       "      <th>Retail Price</th>\n",
+       "      <th>Screen Size (Inches)</th>\n",
+       "      <th>Battery Life (Hours)</th>\n",
+       "      <th>RAM (GB)</th>\n",
+       "      <th>Processor Speeds (GHz)</th>\n",
+       "      <th>Integrated Wireless?</th>\n",
+       "      <th>HD Size (GB)</th>\n",
+       "      <th>Bundled Applications?</th>\n",
+       "      <th>customer X</th>\n",
+       "      <th>customer Y</th>\n",
+       "      <th>store X</th>\n",
+       "      <th>store Y</th>\n",
+       "      <th>Customer Latitude</th>\n",
+       "      <th>Customer Longitude</th>\n",
+       "      <th>Store Latitude</th>\n",
+       "      <th>Store Longitude</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>1/1/08 0:01</td>\n",
+       "      <td>163</td>\n",
+       "      <td>EC4V 5BH</td>\n",
+       "      <td>SE1 2BN</td>\n",
+       "      <td>455.0</td>\n",
+       "      <td>15</td>\n",
+       "      <td>5</td>\n",
+       "      <td>1</td>\n",
+       "      <td>2.0</td>\n",
+       "      <td>Yes</td>\n",
+       "      <td>80</td>\n",
+       "      <td>Yes</td>\n",
+       "      <td>532041</td>\n",
+       "      <td>180995</td>\n",
+       "      <td>534057.0</td>\n",
+       "      <td>179682.0</td>\n",
+       "      <td>51.512579</td>\n",
+       "      <td>-0.098731</td>\n",
+       "      <td>51.500186</td>\n",
+       "      <td>-0.070057</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>1/1/08 0:02</td>\n",
+       "      <td>320</td>\n",
+       "      <td>SW4 0JL</td>\n",
+       "      <td>SW12 9HD</td>\n",
+       "      <td>545.0</td>\n",
+       "      <td>15</td>\n",
+       "      <td>6</td>\n",
+       "      <td>1</td>\n",
+       "      <td>2.0</td>\n",
+       "      <td>No</td>\n",
+       "      <td>300</td>\n",
+       "      <td>No</td>\n",
+       "      <td>529240</td>\n",
+       "      <td>175537</td>\n",
+       "      <td>528739.0</td>\n",
+       "      <td>173080.0</td>\n",
+       "      <td>51.464129</td>\n",
+       "      <td>-0.140912</td>\n",
+       "      <td>51.442082</td>\n",
+       "      <td>-0.149046</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>1/1/08 0:04</td>\n",
+       "      <td>23</td>\n",
+       "      <td>EC3V 1LR</td>\n",
+       "      <td>E2 0RY</td>\n",
+       "      <td>515.0</td>\n",
+       "      <td>15</td>\n",
+       "      <td>4</td>\n",
+       "      <td>1</td>\n",
+       "      <td>2.0</td>\n",
+       "      <td>Yes</td>\n",
+       "      <td>300</td>\n",
+       "      <td>Yes</td>\n",
+       "      <td>533095</td>\n",
+       "      <td>181047</td>\n",
+       "      <td>535652.0</td>\n",
+       "      <td>182961.0</td>\n",
+       "      <td>51.512699</td>\n",
+       "      <td>-0.083435</td>\n",
+       "      <td>51.529346</td>\n",
+       "      <td>-0.045410</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>1/1/08 0:04</td>\n",
+       "      <td>169</td>\n",
+       "      <td>SW1P 3AU</td>\n",
+       "      <td>SE1 2BN</td>\n",
+       "      <td>395.0</td>\n",
+       "      <td>15</td>\n",
+       "      <td>5</td>\n",
+       "      <td>1</td>\n",
+       "      <td>2.0</td>\n",
+       "      <td>No</td>\n",
+       "      <td>40</td>\n",
+       "      <td>Yes</td>\n",
+       "      <td>529902</td>\n",
+       "      <td>179641</td>\n",
+       "      <td>534057.0</td>\n",
+       "      <td>179682.0</td>\n",
+       "      <td>51.500787</td>\n",
+       "      <td>-0.129897</td>\n",
+       "      <td>51.500186</td>\n",
+       "      <td>-0.070057</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>1/1/08 0:06</td>\n",
+       "      <td>365</td>\n",
+       "      <td>EC4V 4EG</td>\n",
+       "      <td>SW1V 4QQ</td>\n",
+       "      <td>585.0</td>\n",
+       "      <td>15</td>\n",
+       "      <td>6</td>\n",
+       "      <td>2</td>\n",
+       "      <td>2.0</td>\n",
+       "      <td>No</td>\n",
+       "      <td>120</td>\n",
+       "      <td>Yes</td>\n",
+       "      <td>531684</td>\n",
+       "      <td>180948</td>\n",
+       "      <td>528924.0</td>\n",
+       "      <td>178440.0</td>\n",
+       "      <td>51.51212</td>\n",
+       "      <td>-0.103737</td>\n",
+       "      <td>51.490255</td>\n",
+       "      <td>-0.144474</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "          Date  Configuration Customer Postcode Store Postcode  Retail Price  \\\n",
+       "0  1/1/08 0:01            163          EC4V 5BH        SE1 2BN         455.0   \n",
+       "1  1/1/08 0:02            320           SW4 0JL       SW12 9HD         545.0   \n",
+       "2  1/1/08 0:04             23          EC3V 1LR         E2 0RY         515.0   \n",
+       "3  1/1/08 0:04            169          SW1P 3AU        SE1 2BN         395.0   \n",
+       "4  1/1/08 0:06            365          EC4V 4EG       SW1V 4QQ         585.0   \n",
+       "\n",
+       "   Screen Size (Inches)  Battery Life (Hours)  RAM (GB)  \\\n",
+       "0                    15                     5         1   \n",
+       "1                    15                     6         1   \n",
+       "2                    15                     4         1   \n",
+       "3                    15                     5         1   \n",
+       "4                    15                     6         2   \n",
+       "\n",
+       "   Processor Speeds (GHz) Integrated Wireless?  HD Size (GB)  \\\n",
+       "0                     2.0                  Yes            80   \n",
+       "1                     2.0                   No           300   \n",
+       "2                     2.0                  Yes           300   \n",
+       "3                     2.0                   No            40   \n",
+       "4                     2.0                   No           120   \n",
+       "\n",
+       "  Bundled Applications?  customer X  customer Y   store X   store Y  \\\n",
+       "0                   Yes      532041      180995  534057.0  179682.0   \n",
+       "1                    No      529240      175537  528739.0  173080.0   \n",
+       "2                   Yes      533095      181047  535652.0  182961.0   \n",
+       "3                   Yes      529902      179641  534057.0  179682.0   \n",
+       "4                   Yes      531684      180948  528924.0  178440.0   \n",
+       "\n",
+       "  Customer Latitude Customer Longitude  Store Latitude  Store Longitude  \n",
+       "0         51.512579          -0.098731       51.500186        -0.070057  \n",
+       "1         51.464129          -0.140912       51.442082        -0.149046  \n",
+       "2         51.512699          -0.083435       51.529346        -0.045410  \n",
+       "3         51.500787          -0.129897       51.500186        -0.070057  \n",
+       "4          51.51212          -0.103737       51.490255        -0.144474  "
+      ]
+     },
+     "execution_count": 4,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "mydata.head() #looking at the data to develop the map accordingly"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "#### Create store list."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "mystore = mydata.loc[:,['Store Latitude','Store Longitude']] #creating the df of all stores, and their coordinates"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "store = mystore.drop_duplicates() #removing any duplicates from the list (only keeps the distinct store coordinates)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "store.reset_index(drop = True, inplace = True) #creating an index based on distinct coordinates"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "C:\\Users\\architmanuja\\Anaconda3\\lib\\site-packages\\ipykernel_launcher.py:1: SettingWithCopyWarning: \n",
+      "A value is trying to be set on a copy of a slice from a DataFrame\n",
+      "\n",
+      "See the caveats in the documentation: http://pandas.pydata.org/pandas-docs/stable/indexing.html#indexing-view-versus-copy\n",
+      "  \"\"\"Entry point for launching an IPython kernel.\n"
+     ]
+    }
+   ],
+   "source": [
+    "store.dropna(inplace = True) #removing null values if any"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>Store Latitude</th>\n",
+       "      <th>Store Longitude</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>51.500186</td>\n",
+       "      <td>-0.070057</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>51.442082</td>\n",
+       "      <td>-0.149046</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>51.529346</td>\n",
+       "      <td>-0.045410</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>51.490255</td>\n",
+       "      <td>-0.144474</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>51.483307</td>\n",
+       "      <td>-0.025775</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>5</th>\n",
+       "      <td>51.461802</td>\n",
+       "      <td>-0.199785</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>6</th>\n",
+       "      <td>51.398191</td>\n",
+       "      <td>-0.093631</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>7</th>\n",
+       "      <td>51.551091</td>\n",
+       "      <td>-0.137239</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>8</th>\n",
+       "      <td>51.485033</td>\n",
+       "      <td>-0.279066</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>9</th>\n",
+       "      <td>51.500787</td>\n",
+       "      <td>-0.129897</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>10</th>\n",
+       "      <td>51.541776</td>\n",
+       "      <td>0.037959</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>11</th>\n",
+       "      <td>51.600827</td>\n",
+       "      <td>-0.194725</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>12</th>\n",
+       "      <td>51.519370</td>\n",
+       "      <td>-0.211483</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>13</th>\n",
+       "      <td>51.418947</td>\n",
+       "      <td>-0.305625</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>14</th>\n",
+       "      <td>51.593016</td>\n",
+       "      <td>-0.070008</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "    Store Latitude  Store Longitude\n",
+       "0        51.500186        -0.070057\n",
+       "1        51.442082        -0.149046\n",
+       "2        51.529346        -0.045410\n",
+       "3        51.490255        -0.144474\n",
+       "4        51.483307        -0.025775\n",
+       "5        51.461802        -0.199785\n",
+       "6        51.398191        -0.093631\n",
+       "7        51.551091        -0.137239\n",
+       "8        51.485033        -0.279066\n",
+       "9        51.500787        -0.129897\n",
+       "10       51.541776         0.037959\n",
+       "11       51.600827        -0.194725\n",
+       "12       51.519370        -0.211483\n",
+       "13       51.418947        -0.305625\n",
+       "14       51.593016        -0.070008"
+      ]
+     },
+     "execution_count": 9,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "store #looking at the df to ensure it is shown properly"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "store_list = store.values.tolist() #creating the list"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "#### Create distinct customer list. \n",
+    "\n",
+    "#### Note: some customer latitude and longitude have value 'FAILED' and we remove them. In addition, the type of Customer lat. and long. are string."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "mycustomer = mydata.loc[:,['Customer Latitude','Customer Longitude']].drop_duplicates().reset_index(drop=True) #creating a new df with customer coordinates"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>Customer Latitude</th>\n",
+       "      <th>Customer Longitude</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>484</th>\n",
+       "      <td>FAILED</td>\n",
+       "      <td>FAILED</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "    Customer Latitude Customer Longitude\n",
+       "484            FAILED             FAILED"
+      ]
+     },
+     "execution_count": 12,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "mycustomer[mycustomer['Customer Latitude'] == 'FAILED'] "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "mycustomer_nofail = mycustomer.drop(mycustomer.index[484]).reset_index(drop=True) #creating the index"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "#### Drop 'FAILED' value in customer longitude to create no-fail data from original dataframe."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 14,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "fail_list = list(mydata[mydata['Customer Longitude']=='FAILED'].index)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 15,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "nofail_data = mydata.drop(fail_list) #removing the 'FAILED' rows"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 16,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "nofail_data.reset_index(drop=True, inplace = True) #creating another index - on clean data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 17,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>Date</th>\n",
+       "      <th>Configuration</th>\n",
+       "      <th>Customer Postcode</th>\n",
+       "      <th>Store Postcode</th>\n",
+       "      <th>Retail Price</th>\n",
+       "      <th>Screen Size (Inches)</th>\n",
+       "      <th>Battery Life (Hours)</th>\n",
+       "      <th>RAM (GB)</th>\n",
+       "      <th>Processor Speeds (GHz)</th>\n",
+       "      <th>Integrated Wireless?</th>\n",
+       "      <th>HD Size (GB)</th>\n",
+       "      <th>Bundled Applications?</th>\n",
+       "      <th>customer X</th>\n",
+       "      <th>customer Y</th>\n",
+       "      <th>store X</th>\n",
+       "      <th>store Y</th>\n",
+       "      <th>Customer Latitude</th>\n",
+       "      <th>Customer Longitude</th>\n",
+       "      <th>Store Latitude</th>\n",
+       "      <th>Store Longitude</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>1/1/08 0:01</td>\n",
+       "      <td>163</td>\n",
+       "      <td>EC4V 5BH</td>\n",
+       "      <td>SE1 2BN</td>\n",
+       "      <td>455.0</td>\n",
+       "      <td>15</td>\n",
+       "      <td>5</td>\n",
+       "      <td>1</td>\n",
+       "      <td>2.0</td>\n",
+       "      <td>Yes</td>\n",
+       "      <td>80</td>\n",
+       "      <td>Yes</td>\n",
+       "      <td>532041</td>\n",
+       "      <td>180995</td>\n",
+       "      <td>534057.0</td>\n",
+       "      <td>179682.0</td>\n",
+       "      <td>51.512579</td>\n",
+       "      <td>-0.098731</td>\n",
+       "      <td>51.500186</td>\n",
+       "      <td>-0.070057</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>1/1/08 0:02</td>\n",
+       "      <td>320</td>\n",
+       "      <td>SW4 0JL</td>\n",
+       "      <td>SW12 9HD</td>\n",
+       "      <td>545.0</td>\n",
+       "      <td>15</td>\n",
+       "      <td>6</td>\n",
+       "      <td>1</td>\n",
+       "      <td>2.0</td>\n",
+       "      <td>No</td>\n",
+       "      <td>300</td>\n",
+       "      <td>No</td>\n",
+       "      <td>529240</td>\n",
+       "      <td>175537</td>\n",
+       "      <td>528739.0</td>\n",
+       "      <td>173080.0</td>\n",
+       "      <td>51.464129</td>\n",
+       "      <td>-0.140912</td>\n",
+       "      <td>51.442082</td>\n",
+       "      <td>-0.149046</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>1/1/08 0:04</td>\n",
+       "      <td>23</td>\n",
+       "      <td>EC3V 1LR</td>\n",
+       "      <td>E2 0RY</td>\n",
+       "      <td>515.0</td>\n",
+       "      <td>15</td>\n",
+       "      <td>4</td>\n",
+       "      <td>1</td>\n",
+       "      <td>2.0</td>\n",
+       "      <td>Yes</td>\n",
+       "      <td>300</td>\n",
+       "      <td>Yes</td>\n",
+       "      <td>533095</td>\n",
+       "      <td>181047</td>\n",
+       "      <td>535652.0</td>\n",
+       "      <td>182961.0</td>\n",
+       "      <td>51.512699</td>\n",
+       "      <td>-0.083435</td>\n",
+       "      <td>51.529346</td>\n",
+       "      <td>-0.045410</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>1/1/08 0:04</td>\n",
+       "      <td>169</td>\n",
+       "      <td>SW1P 3AU</td>\n",
+       "      <td>SE1 2BN</td>\n",
+       "      <td>395.0</td>\n",
+       "      <td>15</td>\n",
+       "      <td>5</td>\n",
+       "      <td>1</td>\n",
+       "      <td>2.0</td>\n",
+       "      <td>No</td>\n",
+       "      <td>40</td>\n",
+       "      <td>Yes</td>\n",
+       "      <td>529902</td>\n",
+       "      <td>179641</td>\n",
+       "      <td>534057.0</td>\n",
+       "      <td>179682.0</td>\n",
+       "      <td>51.500787</td>\n",
+       "      <td>-0.129897</td>\n",
+       "      <td>51.500186</td>\n",
+       "      <td>-0.070057</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>1/1/08 0:06</td>\n",
+       "      <td>365</td>\n",
+       "      <td>EC4V 4EG</td>\n",
+       "      <td>SW1V 4QQ</td>\n",
+       "      <td>585.0</td>\n",
+       "      <td>15</td>\n",
+       "      <td>6</td>\n",
+       "      <td>2</td>\n",
+       "      <td>2.0</td>\n",
+       "      <td>No</td>\n",
+       "      <td>120</td>\n",
+       "      <td>Yes</td>\n",
+       "      <td>531684</td>\n",
+       "      <td>180948</td>\n",
+       "      <td>528924.0</td>\n",
+       "      <td>178440.0</td>\n",
+       "      <td>51.51212</td>\n",
+       "      <td>-0.103737</td>\n",
+       "      <td>51.490255</td>\n",
+       "      <td>-0.144474</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "          Date  Configuration Customer Postcode Store Postcode  Retail Price  \\\n",
+       "0  1/1/08 0:01            163          EC4V 5BH        SE1 2BN         455.0   \n",
+       "1  1/1/08 0:02            320           SW4 0JL       SW12 9HD         545.0   \n",
+       "2  1/1/08 0:04             23          EC3V 1LR         E2 0RY         515.0   \n",
+       "3  1/1/08 0:04            169          SW1P 3AU        SE1 2BN         395.0   \n",
+       "4  1/1/08 0:06            365          EC4V 4EG       SW1V 4QQ         585.0   \n",
+       "\n",
+       "   Screen Size (Inches)  Battery Life (Hours)  RAM (GB)  \\\n",
+       "0                    15                     5         1   \n",
+       "1                    15                     6         1   \n",
+       "2                    15                     4         1   \n",
+       "3                    15                     5         1   \n",
+       "4                    15                     6         2   \n",
+       "\n",
+       "   Processor Speeds (GHz) Integrated Wireless?  HD Size (GB)  \\\n",
+       "0                     2.0                  Yes            80   \n",
+       "1                     2.0                   No           300   \n",
+       "2                     2.0                  Yes           300   \n",
+       "3                     2.0                   No            40   \n",
+       "4                     2.0                   No           120   \n",
+       "\n",
+       "  Bundled Applications?  customer X  customer Y   store X   store Y  \\\n",
+       "0                   Yes      532041      180995  534057.0  179682.0   \n",
+       "1                    No      529240      175537  528739.0  173080.0   \n",
+       "2                   Yes      533095      181047  535652.0  182961.0   \n",
+       "3                   Yes      529902      179641  534057.0  179682.0   \n",
+       "4                   Yes      531684      180948  528924.0  178440.0   \n",
+       "\n",
+       "  Customer Latitude Customer Longitude  Store Latitude  Store Longitude  \n",
+       "0         51.512579          -0.098731       51.500186        -0.070057  \n",
+       "1         51.464129          -0.140912       51.442082        -0.149046  \n",
+       "2         51.512699          -0.083435       51.529346        -0.045410  \n",
+       "3         51.500787          -0.129897       51.500186        -0.070057  \n",
+       "4          51.51212          -0.103737       51.490255        -0.144474  "
+      ]
+     },
+     "execution_count": 17,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "nofail_data.head() #visualizing the table with clean data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 18,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "297364"
+      ]
+     },
+     "execution_count": 18,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "len(mydata) #checking the length of 'mydata'"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 19,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "296980"
+      ]
+     },
+     "execution_count": 19,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "len(nofail_data) #checking the length of 'nofail_data'"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "#### Create store-customer list to map on the map."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 20,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "store_customer = nofail_data.loc[:,['Customer Latitude','Customer Longitude', 'Store Latitude','Store Longitude']] #creating a new df with both customer and store coordinates"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 21,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "296980"
+      ]
+     },
+     "execution_count": 21,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "len(store_customer) #checking the length of 'store_customer'"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 22,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "store_customer_distinct = store_customer.drop_duplicates().reset_index(drop = True) #removing duplicates"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 23,
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "2633"
+      ]
+     },
+     "execution_count": 23,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "len(store_customer_distinct) #checking how many rows of distinct store-customer combinations are present"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 24,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "store_customer_distinct_list = store_customer_distinct.values.tolist() #create the list - convert to list"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "#### Calculating the averages of all the variables included in data by store"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 25,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "Index(['Retail Price', 'Screen Size (Inches)', 'Battery Life (Hours)',\n",
+       "       'RAM (GB)', 'Processor Speeds (GHz)', 'HD Size (GB)'],\n",
+       "      dtype='object')"
+      ]
+     },
+     "execution_count": 25,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "mydataStore = mydata.dropna().groupby('Store Postcode')['Retail Price','Screen Size (Inches)','Battery Life (Hours)','RAM (GB)','Processor Speeds (GHz)','HD Size (GB)'].mean().round(2)\n",
+    "mydataStore.columns #calculating the averages for all the variables included in dataset by store"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 26,
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>Retail Price</th>\n",
+       "      <th>Screen Size (Inches)</th>\n",
+       "      <th>Battery Life (Hours)</th>\n",
+       "      <th>RAM (GB)</th>\n",
+       "      <th>Processor Speeds (GHz)</th>\n",
+       "      <th>HD Size (GB)</th>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>Store Postcode</th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>CR7 8LE</th>\n",
+       "      <td>471.84</td>\n",
+       "      <td>15.79</td>\n",
+       "      <td>4.99</td>\n",
+       "      <td>2.12</td>\n",
+       "      <td>1.93</td>\n",
+       "      <td>133.50</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>E2 0RY</th>\n",
+       "      <td>520.21</td>\n",
+       "      <td>15.81</td>\n",
+       "      <td>4.97</td>\n",
+       "      <td>2.10</td>\n",
+       "      <td>1.93</td>\n",
+       "      <td>133.16</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>E7 8NW</th>\n",
+       "      <td>467.01</td>\n",
+       "      <td>15.79</td>\n",
+       "      <td>4.95</td>\n",
+       "      <td>2.10</td>\n",
+       "      <td>1.92</td>\n",
+       "      <td>129.83</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>KT2 5AU</th>\n",
+       "      <td>521.47</td>\n",
+       "      <td>15.82</td>\n",
+       "      <td>4.98</td>\n",
+       "      <td>2.11</td>\n",
+       "      <td>1.92</td>\n",
+       "      <td>131.35</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>N17 6QA</th>\n",
+       "      <td>522.93</td>\n",
+       "      <td>15.82</td>\n",
+       "      <td>4.97</td>\n",
+       "      <td>2.12</td>\n",
+       "      <td>1.93</td>\n",
+       "      <td>131.52</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "                Retail Price  Screen Size (Inches)  Battery Life (Hours)  \\\n",
+       "Store Postcode                                                             \n",
+       "CR7 8LE               471.84                 15.79                  4.99   \n",
+       "E2 0RY                520.21                 15.81                  4.97   \n",
+       "E7 8NW                467.01                 15.79                  4.95   \n",
+       "KT2 5AU               521.47                 15.82                  4.98   \n",
+       "N17 6QA               522.93                 15.82                  4.97   \n",
+       "\n",
+       "                RAM (GB)  Processor Speeds (GHz)  HD Size (GB)  \n",
+       "Store Postcode                                                  \n",
+       "CR7 8LE             2.12                    1.93        133.50  \n",
+       "E2 0RY              2.10                    1.93        133.16  \n",
+       "E7 8NW              2.10                    1.92        129.83  \n",
+       "KT2 5AU             2.11                    1.92        131.35  \n",
+       "N17 6QA             2.12                    1.93        131.52  "
+      ]
+     },
+     "execution_count": 26,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "mydataStore.head() #looking at the averages - this would be added to the markers"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 32,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "Store_Postcodes = mydata.loc[:,['Store Postcode']] #creating the df of all stores postcodes - to be used for displaying the table"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 33,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "Store_Postcode = Store_Postcodes.drop_duplicates() #removing any duplicates from the df (only keeps the distinct store postcodes)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 37,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "Store_Postcode = Store_Postcode.sort_values(by='Store Postcode') #sorting the store postcodes alphabatically"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 42,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "Store_Postcode = Store_Postcode.values.tolist()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Create Map"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 48,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# creating the function for making the table to be put into the marker - using html\n",
+    "import os\n",
+    "def fancy_html(row):\n",
+    "    i = row\n",
+    "    StorePostcode = Store_Postcode[i]\n",
+    "    Retail_price = mydataStore['Retail Price'][i]                             \n",
+    "    Screen = mydataStore['Screen Size (Inches)'][i]                           \n",
+    "    battery = mydataStore['Battery Life (Hours)'][i] \n",
+    "    ram = mydataStore['RAM (GB)'][i]\n",
+    "    ghz = mydataStore['Processor Speeds (GHz)'][i]\n",
+    "    hd = mydataStore['HD Size (GB)'][i]\n",
+    "    img =  '\"' +\"./images/\" +str(i) + \".jpg\" + '\"'\n",
+    "    \n",
+    "    left_col_colour = \"#800000\"\n",
+    "    right_col_colour = \"#C5DCE7\"\n",
+    "\n",
+    "    html = \"\"\"<!DOCTYPE html>\n",
+    "<html>\n",
+    "\n",
+    "<head>\n",
+    "<h3><b>Average Performance</h1>\n",
+    "</head>\n",
+    "<body>\n",
+    "<img src=\"https://i1.wp.com/forensicstore.com/wp-content/uploads/2017/08/computer-store-background.jpg?ssl=1\" height = 100 width = 248>\n",
+    "    <table style=\"height: 126px; width: 250px;\">\n",
+    "<tbody>\n",
+    "<tr>\n",
+    "<td style=\"background-color: \"\"\"+ left_col_colour +\"\"\";\"><span style=\"color: #ffffff;\">Store Postcode</span></td>\n",
+    "<td style=\"width: 60px;background-color: \"\"\"+ right_col_colour +\"\"\";\">{}</td>\"\"\".format(StorePostcode) + \"\"\"\n",
+    "</tr>\n",
+    "<tr>\n",
+    "<td style=\"background-color: \"\"\"+ left_col_colour +\"\"\";\"><span style=\"color: #ffffff;\">Retail Price</span></td>\n",
+    "<td style=\"width: 60px;background-color: \"\"\"+ right_col_colour +\"\"\";\">{}</td>\"\"\".format(Retail_price) + \"\"\"\n",
+    "</tr>\n",
+    "<tr>\n",
+    "<td style=\"background-color: \"\"\"+ left_col_colour +\"\"\";\"><span style=\"color: #ffffff;\">Screen Size (Inches)</span></td>\n",
+    "<td style=\"width: 60px;background-color: \"\"\"+ right_col_colour +\"\"\";\">{}</td>\"\"\".format(Screen) + \"\"\"\n",
+    "<tr>\n",
+    "<td style=\"background-color: \"\"\"+ left_col_colour +\"\"\";\"><span style=\"color: #ffffff;\">Battery Life (Hours)</span></td>\n",
+    "<td style=\"width: 60px;background-color: \"\"\"+ right_col_colour +\"\"\";\">{}</td>\"\"\".format(battery) + \"\"\"\n",
+    "</tr>\n",
+    "<tr>\n",
+    "<td style=\"background-color: \"\"\"+ left_col_colour +\"\"\";\"><span style=\"color: #ffffff;\">RAM (GB)</span></td>\n",
+    "<td style=\"width: 60px;background-color: \"\"\"+ right_col_colour +\"\"\";\">{}</td>\"\"\".format(ram) + \"\"\"\n",
+    "</tr>\n",
+    "<tr>\n",
+    "<td style=\"background-color: \"\"\"+ left_col_colour +\"\"\";\"><span style=\"color: #ffffff;\">Processor Speeds (GHz)</span></td>\n",
+    "<td style=\"width: 60px;background-color: \"\"\"+ right_col_colour +\"\"\";\">{}</td>\"\"\".format(ghz) + \"\"\"\n",
+    "</tr>\n",
+    "<tr>\n",
+    "<td style=\"background-color: \"\"\"+ left_col_colour +\"\"\";\"><span style=\"color: #ffffff;\">HD Size (GB)</span></td>\n",
+    "<td style=\"width: 60px;background-color: \"\"\"+ right_col_colour +\"\"\";\">{}</td>\"\"\".format(hd) + \"\"\"\n",
+    "</tr>\n",
+    "</tbody>\n",
+    "</body>\n",
+    "</table>\n",
+    "</html>\n",
+    "\"\"\"\n",
+    "    return html"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 49,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "processing: Store1......\n",
+      "processing: Store2......\n",
+      "processing: Store3......\n",
+      "processing: Store4......\n",
+      "processing: Store5......\n",
+      "processing: Store6......\n",
+      "processing: Store7......\n",
+      "processing: Store8......\n",
+      "processing: Store9......\n",
+      "processing: Store10......\n",
+      "processing: Store11......\n",
+      "processing: Store12......\n",
+      "processing: Store13......\n",
+      "processing: Store14......\n",
+      "processing: Store15......\n",
+      "Done\n"
+     ]
+    }
+   ],
+   "source": [
+    "#creating the map using folium - includes the list for seeing where customers are coming from, and the table for averages by store\n",
+    "m = folium.Map(location = (51.500186,-0.070057), tiles = 'Cartodb Positron')\n",
+    "for i in range(len(store)):\n",
+    "    feature_group = folium.FeatureGroup(name = 'store'+str(i+1), show = False)\n",
+    "    for cuslat, cuslong, stolat, stolong in store_customer_distinct_list:\n",
+    "        if [stolat, stolong] == [store_list[i][0], store_list[i][1]]:\n",
+    "            folium.CircleMarker(location = [float(cuslat), float(cuslong)], radius = 3, color = 'blue', fill_color='darkblue').add_to(m)\n",
+    "            folium.PolyLine(locations = [[float(cuslat), float(cuslong)],[store_list[i][0], store_list[i][1]]]).add_to(feature_group)\n",
+    "    feature_group.add_to(m)\n",
+    "    html = fancy_html(i)\n",
+    "    print('processing: Store' + str(i+1) + \"......\")\n",
+    "    iframe = branca.element.IFrame(html=html,width=400,height=300)\n",
+    "    popup = folium.Popup(iframe,parse_html=True)\n",
+    "    \n",
+    "    folium.Marker(location = [store_list[i][0], store_list[i][1]], icon = folium.Icon('red'), popup = popup, tooltip='Store: ' + str(i+1)).add_to(m)\n",
+    "folium.LayerControl().add_to(m)\n",
+    "m.save('Group2_Project2.html') # This code will save a file name as 'Group_Project.html' in your current directory.\n",
+    "print('Done')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "#### The html is saved in your local directory - called 'Group2_Project2_html'. "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "#### Use feature group at the top right of html page to see polylines"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.5.3"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}
